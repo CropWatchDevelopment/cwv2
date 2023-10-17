@@ -835,11 +835,11 @@ int8_t Modbus::getRxBuffer()
         u16errCnt++;
         return ERR_BUFF_OVERFLOW;
     }
-    for(int i = 0; i < u8BufferSize; i++)
-    {
-        p( au8Buffer[ i ] );
-    }
-    Serial2.println("");
+    // for(int i = 0; i < u8BufferSize; i++)
+    // {
+    //     p( au8Buffer[ i ] );
+    // }
+    // Serial2.println("");
     return u8BufferSize;
 }
 
@@ -864,33 +864,34 @@ void Modbus::sendTxBuffer()
     au8Buffer[ u8BufferSize ] = u16crc & 0x00ff;
     u8BufferSize++;
 
-    //if (u8txenpin > 1)
-    //{
-        // set RS485 transceiver to transmit mode
-        digitalWrite(3, HIGH );
-    //}
-    for(int i = 0; i < u8BufferSize; i++)
+    if (u8txenpin > 1)
     {
-        p( au8Buffer[ i ] );
+        // set RS485 transceiver to transmit mode
+        digitalWrite(3, u8txenpin );
+        digitalWrite(2, HIGH );
     }
-    Serial2.println("");
+    // for(int i = 0; i < u8BufferSize; i++)
+    // {
+    //     p( au8Buffer[ i ] );
+    // }
+    // Serial2.println("");
 
     // transfer buffer to serial line
     port->write( au8Buffer, u8BufferSize );
 
-    //if (u8txenpin > 1)
-    //{
+    if (u8txenpin > 1)
+    {
         // must wait transmission end before changing pin state
         // soft serial does not need it since it is blocking
         // ...but the implementation in SoftwareSerial does nothing
         // anyway, so no harm in calling it.
         port->flush();
-        Serial1.flush();
         // return RS485 transceiver to receive mode
         volatile uint32_t u32overTimeCountDown = u32overTime;
         while ( u32overTimeCountDown-- > 0);
-        digitalWrite( 3, LOW );
-    //}
+        digitalWrite( u8txenpin, LOW );
+        digitalWrite(2, LOW );
+    }
     while(port->read() >= 0);
 
     u8BufferSize = 0;

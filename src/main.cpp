@@ -46,7 +46,7 @@ void loop()
     telegram.u8id = 1;        // slave address
     telegram.u8fct = 3;       // function code (this one is registers read)
     telegram.u16RegAdd = 0;   // start address in slave
-    telegram.u16CoilsNo = 3;  // number of elements (coils or registers) to read
+    telegram.u16CoilsNo = 7;  // number of elements (coils or registers) to read
     telegram.au16reg = au16data; // pointer to a memory array in the Arduino
 
     master.query(telegram); // send query (only once)
@@ -61,13 +61,13 @@ void loop()
 
       if (master.capture_Success)
       {
-        Serial2.println(au16data[0]);
-        Serial2.println(au16data[1]);
-        Serial2.println(au16data[2]);
-      }
-      else
-      {
-        Serial2.println("Failed...");
+        for(int i = 0; i < 8; i++)
+        {
+          Serial2.print(au16data[i]);
+          Serial2.print(" ");
+        }
+        Serial2.println(" - SUCCESS!!!!!");
+        delay(5000);
       }
     }
     break;
